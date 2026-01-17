@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist de Inserção de DAVC - Google Sheets</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004c99;
+            --secondary: #00a896;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
+            --gray-50: #f8f9fa;
+            --gray-100: #e9ecef;
+            --gray-200: #dee2e6;
+            --gray-300: #ced4da;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
+            --white: #ffffff;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--gray-800);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 30px;
+            border-left: 6px solid var(--primary);
+        }
+        
+        .header h1 {
+            color: var(--primary-dark);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+        
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .connection-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .connection-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .connection-status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: var(--gray-50);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .stat-card strong {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        
+        .stat-card span {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .config-panel {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 6px solid var(--warning);
+        }
+        
+        .config-panel h3 {
+            color: var(--gray-800);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .config-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .config-input-group input {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-container {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+        
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .required {
+            color: var(--danger);
+            font-size: 16px;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            padding: 12px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .checkbox-item:hover,
+        .radio-item:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-300);
+        }
+        
+        .checkbox-item.active,
+        .radio-item.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .conditional-field {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            border-left: 3px solid var(--warning);
+            display: none;
+        }
+        
+        .conditional-field.visible {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .action-buttons {
+            padding: 30px;
+            background: var(--gray-50);
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-800);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--gray-300);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--gray-800);
+        }
+        
+        .btn-warning:hover:not(:disabled) {
+            background: #e0a800;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        }
+        
+        .toast.show {
+            display: flex;
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .toast.warning {
+            background: var(--warning);
+            color: var(--gray-800);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .spinner {
+            border: 4px solid var(--gray-200);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .config-input-group {
+                flex-direction: column;
+            }
+            
+            .config-input-group input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Checklist de Inserção de DAVC</h1>
+            <p>Dispositivo de Acesso Venoso Central - Prevenção de IRAS</p>
+            <div id="connectionStatus" class="connection-status pending">
+                <span>⚙️</span>
+                <span>Aguardando configuração do Google Sheets</span>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <strong>Salvos Localmente</strong>
+                    <span id="localCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <strong>Sincronizados</strong>
+                    <span id="syncCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <strong>Pendentes</strong>
+                    <span id="pendingCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Configuração -->
+        <div class="config-panel" id="configPanel">
+            <h3>⚙️ Configuração do Google Sheets</h3>
+            <p style="color: var(--gray-600); margin-bottom: 15px;">
+                Cole a URL do seu Web App do Google Sheets aqui. Se ainda não configurou, 
+                <a href="#" onclick="mostrarInstrucoes(); return false;" style="color: var(--primary);">clique aqui para ver as instruções</a>.
+            </p>
+            <div class="config-input-group">
+                <input 
+                    type="text" 
+                    id="webAppUrl" 
+                    placeholder="https://script.google.com/macros/s/...../exec"
+                    value="">
+                <button class="btn-primary" onclick="salvarConfiguracao()">
+                    💾 Salvar Configuração
+                </button>
+                <button class="btn-warning" onclick="testarConexao()">
+                    🔗 Testar Conexão
+                </button>
+            </div>
+        </div>
+
+        <form id="davcForm" class="form-container">
+            <!-- Seção 1: Dados do Paciente -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">1</div>
+                    <div class="section-title">Dados do Paciente</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome do Paciente <span class="required">*</span></label>
+                        <input type="text" name="nomePaciente" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nº Prontuário <span class="required">*</span></label>
+                        <input type="text" name="prontuario" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sexo <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="sexo" value="Masculino" required>
+                                Masculino
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="sexo" value="Feminino" required>
+                                Feminino
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Idade <span class="required">*</span></label>
+                        <input type="number" name="idade" min="0" max="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Internação na UI <span class="required">*</span></label>
+                        <input type="date" name="dataInternacao" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Diagnóstico da Internação</label>
+                        <textarea name="diagnostico"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Setor <span class="required">*</span></label>
+                        <select name="setor" required>
+                            <option value="">Selecione...</option>
+                            <option value="UTI">UTI</option>
+                            <option value="CMC">CMC</option>
+                            <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                            <option value="PS">PS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Leito/Box <span class="required">*</span></label>
+                        <input type="text" name="leito" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 2: Dados da Inserção -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">2</div>
+                    <div class="section-title">Dados da Inserção</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data Inserção DAVC <span class="required">*</span></label>
+                        <input type="date" name="dataInsercao" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Turno <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="turno" value="Manhã" required>
+                                Manhã
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="turno" value="Tarde" required>
+                                Tarde
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="turno" value="Noite" required>
+                                Noite
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 3: Profissionais -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">3</div>
+                    <div class="section-title">Profissionais Envolvidos</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Nome do Responsável pela Inserção <span class="required">*</span></label>
+                        <input type="text" name="nomeResponsavel" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria Profissional <span class="required">*</span></label>
+                        <select name="categoriaResponsavel" id="categoriaResponsavel" required>
+                            <option value="">Selecione...</option>
+                            <option value="Médico plantonista">Médico plantonista</option>
+                            <option value="Médico residente">Médico residente</option>
+                        </select>
+                    </div>
+                    <div class="form-group conditional-field" id="residenciaField">
+                        <label>Ano de Residência</label>
+                        <select name="anoResidencia">
+                            <option value="">Selecione...</option>
+                            <option value="R1">R1</option>
+                            <option value="R2">R2</option>
+                            <option value="R3">R3</option>
+                            <option value="R4">R4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-top: 20px;">
+                    <div class="form-group full-width">
+                        <label>Profissional Auxiliar</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="auxiliar" value="Enfermeiro">
+                                Enfermeiro
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="auxiliar" value="Residente enfermagem">
+                                Residente enfermagem
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="auxiliar" value="Técnico de enfermagem">
+                                Técnico de enfermagem
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 4: Motivo e Tipo de DAVC -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">4</div>
+                    <div class="section-title">Motivo e Tipo de DAVC</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Motivo da Inserção <span class="required">*</span></label>
+                        <select name="motivoInsercao" id="motivoInsercao" required>
+                            <option value="">Selecione...</option>
+                            <option value="Droga vasoativa">Droga vasoativa</option>
+                            <option value="NPT">NPT</option>
+                            <option value="Hemodiálise">Hemodiálise</option>
+                            <option value="Falência de AVP">Falência de AVP</option>
+                            <option value="Monitorização invasiva">Monitorização invasiva</option>
+                            <option value="Troca de cateter">Troca de cateter</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group conditional-field" id="motivoOutroField">
+                        <label>Especifique o Motivo <span class="required">*</span></label>
+                        <input type="text" name="motivoOutro">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de DAVC <span class="required">*</span></label>
+                        <select name="tipoDavc" required>
+                            <option value="">Selecione...</option>
+                            <option value="Mono lúmen">Mono lúmen</option>
+                            <option value="Duplo lúmen">Duplo lúmen</option>
+                            <option value="Hemodiálise duplo lúmen">Hemodiálise duplo lúmen</option>
+                            <option value="Hemodiálise triplo lúmen">Hemodiálise triplo lúmen</option>
+                            <option value="PAI">PAI</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 5: Local de Inserção -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">5</div>
+                    <div class="section-title">Local de Inserção</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Local de Inserção <span class="required">*</span></label>
+                        <select name="localInsercao" id="localInsercao" required>
+                            <option value="">Selecione...</option>
+                            <option value="Jugular interna direita">Jugular interna direita</option>
+                            <option value="Jugular interna esquerda">Jugular interna esquerda</option>
+                            <option value="Subclávia direita">Subclávia direita</option>
+                            <option value="Subclávia esquerda">Subclávia esquerda</option>
+                            <option value="Femoral direita">Femoral direita</option>
+                            <option value="Femoral esquerda">Femoral esquerda</option>
+                            <option value="PAI radial">PAI radial</option>
+                            <option value="PAI femoral direita">PAI femoral direita</option>
+                            <option value="PAI femoral esquerda">PAI femoral esquerda</option>
+                        </select>
+                    </div>
+                    <div class="form-group conditional-field" id="femoralJustificativaField">
+                        <label>Justificativa para Inserção Femoral <span class="required">*</span></label>
+                        <select name="femoralJustificativa">
+                            <option value="">Selecione...</option>
+                            <option value="Plaquetopenia">Plaquetopenia</option>
+                            <option value="Uremia">Uremia</option>
+                            <option value="RNI alargado">RNI alargado</option>
+                            <option value="Dificuldade anatômica">Dificuldade anatômica</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nº de Tentativas <span class="required">*</span></label>
+                        <select name="numTentativas" required>
+                            <option value="">Selecione...</option>
+                            <option value="1">Uma</option>
+                            <option value="2">Duas</option>
+                            <option value="3">Três</option>
+                            <option value="Mais de 3">Mais de três</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Houve Mudança de Local?</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="mudancaLocal" value="Sim" id="mudancaLocalSim">
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="mudancaLocal" value="Não" id="mudancaLocalNao" checked>
+                                Não
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group conditional-field full-width" id="mudancaLocalField">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label>Local de Punção Inicial <span class="required">*</span></label>
+                                <select name="localPuncaoInicial">
+                                    <option value="">Selecione...</option>
+                                    <option value="Jugular interna direita">Jugular interna direita</option>
+                                    <option value="Jugular interna esquerda">Jugular interna esquerda</option>
+                                    <option value="Subclávia direita">Subclávia direita</option>
+                                    <option value="Subclávia esquerda">Subclávia esquerda</option>
+                                    <option value="Femoral direita">Femoral direita</option>
+                                    <option value="Femoral esquerda">Femoral esquerda</option>
+                                    <option value="PAI radial">PAI radial</option>
+                                    <option value="PAI femoral direita">PAI femoral direita</option>
+                                    <option value="PAI femoral esquerda">PAI femoral esquerda</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Local de Punção Final <span class="required">*</span></label>
+                                <select name="localPuncaoFinal">
+                                    <option value="">Selecione...</option>
+                                    <option value="Jugular interna direita">Jugular interna direita</option>
+                                    <option value="Jugular interna esquerda">Jugular interna esquerda</option>
+                                    <option value="Subclávia direita">Subclávia direita</option>
+                                    <option value="Subclávia esquerda">Subclávia esquerda</option>
+                                    <option value="Femoral direita">Femoral direita</option>
+                                    <option value="Femoral esquerda">Femoral esquerda</option>
+                                    <option value="PAI radial">PAI radial</option>
+                                    <option value="PAI femoral direita">PAI femoral direita</option>
+                                    <option value="PAI femoral esquerda">PAI femoral esquerda</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Punção Guiada por USG? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="puncaoUSG" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="puncaoUSG" value="Não" required>
+                                Não
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 6: Higiene das Mãos -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">6</div>
+                    <div class="section-title">Antes da Inserção - Higiene das Mãos</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Higienização Realizada? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="higieneMaos" value="Realizada" required>
+                                Realizada
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="higieneMaos" value="Não realizada" required>
+                                Não realizada
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Solução Utilizada</label>
+                        <select name="solucaoHigiene">
+                            <option value="">Selecione...</option>
+                            <option value="Preparação alcoólica">Preparação alcoólica</option>
+                            <option value="Preparação alcoólica com antisséptico">Preparação alcoólica com antisséptico</option>
+                            <option value="Sabonete líquido com antisséptico">Sabonete líquido com antisséptico</option>
+                            <option value="Outra">Outra</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 7: Preparo da Pele -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">7</div>
+                    <div class="section-title">Antes da Inserção - Preparo da Pele</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Sujidade Visível?</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="sujidadeVisivel" value="Sim">
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="sujidadeVisivel" value="Não">
+                                Não
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Limpeza Prévia da Pele</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="limpezaPele" value="Realizada">
+                                Realizada
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="limpezaPele" value="Não realizada">
+                                Não realizada
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Antissepsia da Pele <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="antissepsiaPele" value="Realizada" required>
+                                Realizada
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="antissepsiaPele" value="Não realizada" required>
+                                Não realizada
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Solução de Antissepsia</label>
+                        <select name="solucaoAntissepsia">
+                            <option value="">Selecione...</option>
+                            <option value="Clorexidina alcoólica">Clorexidina alcoólica</option>
+                            <option value="PVPI alcoólica">PVPI alcoólica</option>
+                            <option value="Outra">Outra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempo de Fricção</label>
+                        <select name="tempoFriccao">
+                            <option value="">Selecione...</option>
+                            <option value="Menos de 30 segundos">Menos de 30 segundos</option>
+                            <option value="Mais de 30 segundos">Mais de 30 segundos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempo de Secagem</label>
+                        <select name="tempoSecagem">
+                            <option value="">Selecione...</option>
+                            <option value="Não aguardou secar">Não aguardou secar</option>
+                            <option value="Menos de 2 minutos">Menos de 2 minutos</option>
+                            <option value="2 minutos ou mais">2 minutos ou mais</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 8: Durante a Inserção -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">8</div>
+                    <div class="section-title">Durante a Inserção - EPIs e Barreira Estéril</div>
+                </div>
+                
+                <h4 style="margin-bottom: 15px; color: var(--gray-700); font-size: 15px;">Responsável pela Inserção</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Gorro <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="epiGorro" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiGorro" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiGorro" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Máscara <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="epiMascara" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiMascara" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiMascara" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Luva Estéril <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="epiLuva" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiLuva" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiLuva" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Avental Estéril <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="epiAvental" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiAvental" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="epiAvental" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Campo Estéril (cabeça aos pés) <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="campoEsteril" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="campoEsteril" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="campoEsteril" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 style="margin: 25px 0 15px; color: var(--gray-700); font-size: 15px;">Profissional Auxiliar</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Higienizou as Mãos</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarHigiene" value="Sim">
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarHigiene" value="Não">
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarHigiene" value="Após intervenção">
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Utilizou Gorro</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarGorro" value="Sim">
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarGorro" value="Não">
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarGorro" value="Após intervenção">
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Utilizou Máscara</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarMascara" value="Sim">
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarMascara" value="Não">
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="auxiliarMascara" value="Após intervenção">
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 9: Após a Inserção -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">9</div>
+                    <div class="section-title">Após a Inserção</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Técnica Asséptica no Curativo <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="tecnicaAssetica" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="tecnicaAssetica" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="tecnicaAssetica" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Registrada no Curativo <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="dataRegistrada" value="Sim" required>
+                                Sim
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="dataRegistrada" value="Não" required>
+                                Não
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="dataRegistrada" value="Após intervenção" required>
+                                Após intervenção
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 10: Responsável pelo Preenchimento -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">10</div>
+                    <div class="section-title">Responsável pelo Preenchimento</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome <span class="required">*</span></label>
+                        <input type="text" name="nomePreenchedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria Profissional <span class="required">*</span></label>
+                        <input type="text" name="categoriaPreenchedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Coren/CRM <span class="required">*</span></label>
+                        <input type="text" name="registroPreenchedor" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="action-buttons">
+                <button type="button" class="btn-secondary" onclick="limparFormulario()">
+                    🗑️ Limpar Formulário
+                </button>
+                <button type="button" class="btn-primary" onclick="salvarLocal()">
+                    💾 Salvar Localmente
+                </button>
+                <button type="submit" class="btn-success" id="submitBtn">
+                    ☁️ Enviar para Google Sheets
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMessage">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingMessage">Enviando dados para Google Sheets...</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuração e gerenciamento de conexão
+        let webAppUrl = localStorage.getItem('webAppUrl') || '';
+        
+        function salvarConfiguracao() {
+            const url = document.getElementById('webAppUrl').value.trim();
+            if (!url) {
+                mostrarToast('Por favor, insira a URL do Web App!', 'error');
+                return;
+            }
+            
+            if (!url.includes('script.google.com')) {
+                mostrarToast('URL inválida! Deve ser do Google Apps Script.', 'error');
+                return;
+            }
+            
+            localStorage.setItem('webAppUrl', url);
+            webAppUrl = url;
+            mostrarToast('Configuração salva com sucesso! ✅', 'success');
+            atualizarStatusConexao('pending', 'Configuração salva. Teste a conexão.');
+        }
+        
+        async function testarConexao() {
+            if (!webAppUrl) {
+                mostrarToast('Configure a URL do Web App primeiro!', 'error');
+                return;
+            }
+            
+            mostrarLoading('Testando conexão...');
+            
+            try {
+                const response = await fetch(webAppUrl + '?action=test', {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                
+                // Com no-cors não podemos ler a resposta, mas se não der erro, conexão OK
+                atualizarStatusConexao('connected', 'Conectado ao Google Sheets ✓');
+                mostrarToast('Conexão OK! Sistema pronto para usar. ✅', 'success');
+            } catch (error) {
+                atualizarStatusConexao('disconnected', 'Erro de conexão');
+                mostrarToast('Erro ao conectar. Verifique a URL e permissões.', 'error');
+            } finally {
+                ocultarLoading();
+            }
+        }
+        
+        function atualizarStatusConexao(status, mensagem) {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.className = `connection-status ${status}`;
+            
+            const icons = {
+                connected: '✓',
+                disconnected: '✗',
+                pending: '⚙️'
+            };
+            
+            statusEl.innerHTML = `<span>${icons[status]}</span><span>${mensagem}</span>`;
+        }
+        
+        function mostrarInstrucoes() {
+            alert(`INSTRUÇÕES PARA CONFIGURAR O GOOGLE SHEETS:
+
+1. Abra o Google Sheets e crie uma nova planilha
+2. No menu, vá em: Extensões > Apps Script
+3. Cole o código que está no arquivo "google-apps-script.js"
+4. Clique em "Implantar" > "Nova implantação"
+5. Escolha tipo: "Aplicativo da Web"
+6. Em "Quem tem acesso": escolha "Qualquer pessoa"
+7. Clique em "Implantar"
+8. Copie a URL que aparece
+9. Cole a URL aqui no formulário
+
+Consulte o documento "GUIA_CONFIGURACAO.pdf" para instruções detalhadas com imagens.`);
+        }
+        
+        // Gerenciamento de campos condicionais
+        document.getElementById('categoriaResponsavel').addEventListener('change', function() {
+            const residenciaField = document.getElementById('residenciaField');
+            
+            if (this.value === 'Médico residente') {
+                residenciaField.classList.add('visible');
+            } else {
+                residenciaField.classList.remove('visible');
+            }
+        });
+
+        document.getElementById('motivoInsercao').addEventListener('change', function() {
+            const motivoOutroField = document.getElementById('motivoOutroField');
+            if (this.value === 'Outros' || this.value === 'Troca de cateter') {
+                motivoOutroField.classList.add('visible');
+                document.querySelector('[name="motivoOutro"]').required = true;
+            } else {
+                motivoOutroField.classList.remove('visible');
+                document.querySelector('[name="motivoOutro"]').required = false;
+            }
+        });
+
+        document.getElementById('localInsercao').addEventListener('change', function() {
+            const femoralField = document.getElementById('femoralJustificativaField');
+            if (this.value === 'Femoral direita' || this.value === 'Femoral esquerda') {
+                femoralField.classList.add('visible');
+                document.querySelector('[name="femoralJustificativa"]').required = true;
+            } else {
+                femoralField.classList.remove('visible');
+                document.querySelector('[name="femoralJustificativa"]').required = false;
+            }
+        });
+
+        // Gerenciar campo condicional de mudança de local
+        document.getElementById('mudancaLocalSim').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('mudancaLocalField').classList.add('visible');
+                document.querySelector('[name="localPuncaoInicial"]').required = true;
+                document.querySelector('[name="localPuncaoFinal"]').required = true;
+            }
+        });
+
+        document.getElementById('mudancaLocalNao').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('mudancaLocalField').classList.remove('visible');
+                document.querySelector('[name="localPuncaoInicial"]').required = false;
+                document.querySelector('[name="localPuncaoFinal"]').required = false;
+            }
+        });
+
+        // Estilização visual dos radio buttons e checkboxes
+        document.querySelectorAll('.radio-item, .checkbox-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const input = this.querySelector('input');
+                if (input.type === 'radio') {
+                    this.parentElement.querySelectorAll('.radio-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                } else {
+                    this.classList.toggle('active');
+                }
+            });
+        });
+
+        // Funções de coleta e salvamento de dados
+        function coletarDadosFormulario() {
+            const form = document.getElementById('davcForm');
+            const formData = new FormData(form);
+            const dados = {
+                timestamp: new Date().toISOString(),
+                dataPreenchimento: new Date().toLocaleString('pt-BR')
+            };
+            
+            for (let [key, value] of formData.entries()) {
+                if (dados[key]) {
+                    if (Array.isArray(dados[key])) {
+                        dados[key].push(value);
+                    } else {
+                        dados[key] = [dados[key], value];
+                    }
+                } else {
+                    dados[key] = value;
+                }
+            }
+            
+            // Converter arrays em strings separadas por vírgula
+            Object.keys(dados).forEach(key => {
+                if (Array.isArray(dados[key])) {
+                    dados[key] = dados[key].join(', ');
+                }
+            });
+            
+            return dados;
+        }
+        
+        function salvarLocal() {
+            const dados = coletarDadosFormulario();
+            const formsLocais = JSON.parse(localStorage.getItem('davc_forms_local') || '[]');
+            
+            dados.id = Date.now();
+            dados.sincronizado = false;
+            formsLocais.push(dados);
+            
+            localStorage.setItem('davc_forms_local', JSON.stringify(formsLocais));
+            atualizarContadores();
+            mostrarToast('Dados salvos localmente! 💾', 'success');
+        }
+        
+        async function enviarParaGoogleSheets(dados) {
+            if (!webAppUrl) {
+                throw new Error('URL do Google Sheets não configurada!');
+            }
+            
+            const response = await fetch(webAppUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            // Com no-cors não podemos verificar a resposta, assumimos sucesso se não houver erro
+            return true;
+        }
+        
+        // Submit do formulário
+        document.getElementById('davcForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!webAppUrl) {
+                mostrarToast('Configure o Google Sheets primeiro!', 'error');
+                document.getElementById('configPanel').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            
+            const dados = coletarDadosFormulario();
+            mostrarLoading('Enviando para Google Sheets...');
+            
+            try {
+                // Salva localmente primeiro
+                const formsLocais = JSON.parse(localStorage.getItem('davc_forms_local') || '[]');
+                dados.id = Date.now();
+                dados.sincronizado = false;
+                formsLocais.push(dados);
+                localStorage.setItem('davc_forms_local', JSON.stringify(formsLocais));
+                
+                // Tenta enviar para Google Sheets
+                await enviarParaGoogleSheets(dados);
+                
+                // Marca como sincronizado
+                const formIndex = formsLocais.findIndex(f => f.id === dados.id);
+                if (formIndex !== -1) {
+                    formsLocais[formIndex].sincronizado = true;
+                    localStorage.setItem('davc_forms_local', JSON.stringify(formsLocais));
+                }
+                
+                mostrarToast('Dados enviados com sucesso! ☁️✅', 'success');
+                
+                setTimeout(() => {
+                    limparFormulario();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('Dados salvos localmente. Erro ao sincronizar com Google Sheets.', 'warning');
+            } finally {
+                ocultarLoading();
+                atualizarContadores();
+            }
+        });
+        
+        function limparFormulario() {
+            if (confirm('Tem certeza que deseja limpar o formulário?')) {
+                document.getElementById('davcForm').reset();
+                document.querySelectorAll('.radio-item, .checkbox-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.conditional-field').forEach(f => f.classList.remove('visible'));
+                mostrarToast('Formulário limpo! 🗑️', 'success');
+            }
+        }
+        
+        function atualizarContadores() {
+            const formsLocais = JSON.parse(localStorage.getItem('davc_forms_local') || '[]');
+            const sincronizados = formsLocais.filter(f => f.sincronizado).length;
+            const pendentes = formsLocais.filter(f => !f.sincronizado).length;
+            
+            document.getElementById('localCount').textContent = formsLocais.length;
+            document.getElementById('syncCount').textContent = sincronizados;
+            document.getElementById('pendingCount').textContent = pendentes;
+        }
+        
+        function mostrarToast(mensagem, tipo = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            };
+            
+            toast.className = `toast ${tipo}`;
+            toastIcon.textContent = icons[tipo] || '✅';
+            toastMessage.textContent = mensagem;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+        
+        function mostrarLoading(mensagem) {
+            document.getElementById('loadingMessage').textContent = mensagem;
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+        
+        function ocultarLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+        
+        // Inicialização
+        window.addEventListener('load', function() {
+            if (webAppUrl) {
+                document.getElementById('webAppUrl').value = webAppUrl;
+                atualizarStatusConexao('pending', 'Configuração salva. Teste a conexão.');
+            }
+            
+            atualizarContadores();
+        });
+        
+        // Tentativa automática de sincronizar formulários pendentes ao carregar
+        window.addEventListener('load', async function() {
+            if (!webAppUrl) return;
+            
+            const formsLocais = JSON.parse(localStorage.getItem('davc_forms_local') || '[]');
+            const pendentes = formsLocais.filter(f => !f.sincronizado);
+            
+            if (pendentes.length > 0) {
+                console.log(`Tentando sincronizar ${pendentes.length} formulários pendentes...`);
+                
+                for (let form of pendentes) {
+                    try {
+                        await enviarParaGoogleSheets(form);
+                        form.sincronizado = true;
+                    } catch (error) {
+                        console.error('Erro ao sincronizar:', error);
+                    }
+                }
+                
+                localStorage.setItem('davc_forms_local', JSON.stringify(formsLocais));
+                atualizarContadores();
+            }
+        });
+    </script>
+</body>
+</html>
