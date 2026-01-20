@@ -499,6 +499,74 @@
                 min-width: 100%;
             }
         }
+        
+        /* Estilos para impressão */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .header {
+                border-left: none;
+                box-shadow: none;
+            }
+            
+            .connection-status,
+            .stats-bar,
+            .config-panel,
+            .action-buttons,
+            .saved-forms,
+            .toast,
+            .loading-overlay {
+                display: none !important;
+            }
+            
+            .form-container {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .section-header {
+                background: #f0f0f0;
+                padding: 10px;
+                border: 1px solid #000;
+            }
+            
+            .form-grid {
+                display: block;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+                page-break-inside: avoid;
+            }
+            
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            select,
+            textarea {
+                border: 1px solid #000;
+                background: white;
+                padding: 5px;
+            }
+            
+            .radio-item.active,
+            .checkbox-item.active {
+                background: #ddd;
+                color: #000;
+            }
+            
+            .conditional-field {
+                display: block !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1164,6 +1232,12 @@
                 <button type="button" class="btn-secondary" onclick="limparFormulario()">
                     🗑️ Limpar Formulário
                 </button>
+                <button type="button" class="btn-secondary" onclick="imprimirFormulario()">
+                    🖨️ Imprimir
+                </button>
+                <button type="button" class="btn-secondary" onclick="salvarPDF()">
+                    📄 Salvar como PDF
+                </button>
                 <button type="button" class="btn-primary" onclick="salvarLocal()">
                     💾 Salvar Localmente
                 </button>
@@ -1441,6 +1515,128 @@ Consulte o documento "GUIA_CONFIGURACAO.pdf" para instruções detalhadas com im
                 document.querySelectorAll('.radio-item, .checkbox-item').forEach(i => i.classList.remove('active'));
                 document.querySelectorAll('.conditional-field').forEach(f => f.classList.remove('visible'));
                 mostrarToast('Formulário limpo! 🗑️', 'success');
+            }
+        }
+        
+        /**
+         * Função para imprimir o formulário
+         */
+        function imprimirFormulario() {
+            // Salva o título original
+            const tituloOriginal = document.title;
+            
+            // Pega dados do paciente para o título
+            const nomePaciente = document.querySelector('[name="nomePaciente"]').value || 'Sem nome';
+            const prontuario = document.querySelector('[name="prontuario"]').value || 'S/N';
+            const dataInsercao = document.querySelector('[name="dataInsercao"]').value || new Date().toLocaleDateString();
+            
+            // Altera título temporariamente
+            document.title = `Checklist DAVC - ${nomePaciente} - ${prontuario} - ${dataInsercao}`;
+            
+            // Adiciona classe de impressão ao body
+            document.body.classList.add('printing');
+            
+            // Imprime
+            window.print();
+            
+            // Restaura título
+            document.title = tituloOriginal;
+            
+            // Remove classe de impressão
+            document.body.classList.remove('printing');
+        }
+        
+        /**
+         * Função para salvar como PDF
+         * Usa a API de impressão do navegador com destino PDF
+         */
+        function salvarPDF() {
+            // Verifica se há dados preenchidos
+            const nomePaciente = document.querySelector('[name="nomePaciente"]').value;
+            
+            if (!nomePaciente) {
+                if (!confirm('O formulário ainda não foi preenchido. Deseja gerar PDF mesmo assim?')) {
+                    return;
+                }
+            }
+            
+            // Informar ao usuário
+            mostrarToast('Selecione "Salvar como PDF" na janela de impressão', 'warning');
+            
+            // Aguarda um pouco para o usuário ler a mensagem
+            setTimeout(() => {
+                imprimirFormulario();
+            }, 1500);
+            
+            // Mostra instruções em um alert
+            setTimeout(() => {
+                alert(
+                    '📄 INSTRUÇÕES PARA SALVAR COMO PDF:\n\n' +
+                    '1. Na janela de impressão que abrir\n' +
+                    '2. Em "Destino" ou "Impressora":\n' +
+                    '   → Selecione "Salvar como PDF"\n' +
+                    '   → OU "Microsoft Print to PDF"\n' +
+                    '3. Clique em "Salvar" ou "Imprimir"\n' +
+                    '4. Escolha onde salvar o arquivo\n\n' +
+                    '💡 Dica: O arquivo será salvo com o nome do paciente!'
+                );
+            }, 500);
+        }
+        
+        /**
+         * Função alternativa para salvar PDF usando biblioteca
+         * (mais avançada - requer biblioteca externa)
+         */
+        async function salvarPDFAvancado() {
+            mostrarLoading('Gerando PDF...');
+            
+            try {
+                // Importa biblioteca html2pdf
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                document.head.appendChild(script);
+                
+                script.onload = async () => {
+                    const dados = coletarDadosFormulario();
+                    const nomePaciente = dados.nomePaciente || 'Paciente';
+                    const prontuario = dados.prontuario || 'SN';
+                    const dataInsercao = dados.dataInsercao || new Date().toISOString().split('T')[0];
+                    
+                    const nomeArquivo = `Checklist_DAVC_${nomePaciente.replace(/\s+/g, '_')}_${prontuario}_${dataInsercao}.pdf`;
+                    
+                    // Clona o formulário para não afetar a visualização
+                    const elemento = document.querySelector('.form-container').cloneNode(true);
+                    
+                    // Remove botões de ação do clone
+                    const actionButtons = elemento.querySelector('.action-buttons');
+                    if (actionButtons) actionButtons.remove();
+                    
+                    const opt = {
+                        margin: 10,
+                        filename: nomeArquivo,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    
+                    await html2pdf().set(opt).from(elemento).save();
+                    
+                    ocultarLoading();
+                    mostrarToast('PDF salvo com sucesso! 📄', 'success');
+                };
+                
+                script.onerror = () => {
+                    ocultarLoading();
+                    mostrarToast('Erro ao carregar biblioteca PDF. Use a impressão padrão.', 'error');
+                    // Fallback para impressão normal
+                    imprimirFormulario();
+                };
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                ocultarLoading();
+                mostrarToast('Erro ao gerar PDF. Usando impressão padrão...', 'warning');
+                setTimeout(imprimirFormulario, 1000);
             }
         }
         
